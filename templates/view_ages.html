@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Ages</title>
+</head>
+<body>
+    <h1>All Ages Stored</h1>
+    <ul>
+        {% for name, details in users.items() %}
+            <li>{{ name }}: {{ details.age }}</li>
+        {% endfor %}
+    </ul>
+    <br>
+    <a href="{{ url_for('index') }}">Back to Submit</a>
+</body>
+</html>
