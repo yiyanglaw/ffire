@@ -4,15 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Ages</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
 </head>
 <body>
-    <h1>All Ages Stored</h1>
-    <ul>
-        {% for name, details in users.items() %}
-            <li>{{ name }}: {{ details.age }}</li>
-        {% endfor %}
-    </ul>
-    <br>
-    <a href="{{ url_for('index') }}">Back to Submit</a>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">View Ages</h1>
+            <ul>
+                {% for name, details in users.items() %}
+                <li>{{ name }} - Age: {{ details.age }}</li>
+                {% endfor %}
+            </ul>
+            <a class="button is-link" href="{{ url_for('index') }}">Back</a>
+        </div>
+    </section>
 </body>
 </html>
