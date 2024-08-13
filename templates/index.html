@@ -3,46 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload and View Images</title>
+    <title>Clinic Information System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
 </head>
 <body>
-    <h1>Upload and View Images</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <label for="name">Name:</label>
-        <input type="text" name="name" required><br>
-        <label for="age">Age:</label>
-        <input type="text" name="age" required><br>
-        <button type="submit">Submit</button>
-    </form>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Clinic Information System</h1>
 
-    <form method="POST" enctype="multipart/form-data">
-        <label for="file">Upload Image:</label>
-        <input type="file" name="file"><br>
-        <button type="submit">Upload</button>
-    </form>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="notification is-success">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
 
-    <h2>Users</h2>
-    <ul>
-        {% for name, data in users.items() %}
-            <li>{{ name }}: {{ data['age'] }}</li>
-        {% endfor %}
-    </ul>
+            <form method="post" enctype="multipart/form-data">
+                <div class="field">
+                    <label class="label">Name</label>
+                    <div class="control">
+                        <input class="input" type="text" name="name" placeholder="Enter patient name">
+                    </div>
+                </div>
 
-    <h2>Uploaded Images</h2>
-    <ul>
-        {% for filename in uploaded_files %}
-            <li><a href="{{ url_for('uploaded_file', filename=filename) }}">{{ filename }}</a></li>
-        {% endfor %}
-    </ul>
+                <div class="field">
+                    <label class="label">Age</label>
+                    <div class="control">
+                        <input class="input" type="number" name="age" placeholder="Enter patient age">
+                    </div>
+                </div>
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+                <div class="field">
+                    <label class="label">Patient Image</label>
+                    <div class="control">
+                        <input class="input" type="file" name="file">
+                    </div>
+                </div>
+
+                <div class="control">
+                    <button class="button is-link">Submit</button>
+                </div>
+            </form>
+
+            <h2 class="title is-4">Uploaded Users</h2>
+            <ul>
+                {% for name, details in users.items() %}
+                <li>{{ name }} - Age: {{ details.age }}</li>
+                {% endfor %}
+            </ul>
+
+            <h2 class="title is-4">Uploaded Files</h2>
+            <ul>
+                {% for file in uploaded_files %}
+                <li><a href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
 </body>
 </html>
