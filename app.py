@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
 import firebase_admin
 from firebase_admin import credentials, db
 import os
@@ -58,12 +58,12 @@ def index():
 
     return render_template('index.html', users=users, uploaded_files=uploaded_files)
 
-@app.route('/view_ages')
-def view_ages():
-    # Get all ages stored in Firebase
+@app.route('/view_data', methods=['GET'])
+def view_data():
+    # Get all users stored in Firebase
     ref = db.reference('users')
     users = ref.get()
-    return render_template('view_ages.html', users=users)
+    return jsonify(users)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
