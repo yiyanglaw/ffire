@@ -3,7 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 import os
 import json
-from flask_cors import CORS  # Import CORS
+from flask_cors import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -59,9 +59,22 @@ def view_data():
     try:
         ref = db.reference('users')
         users = ref.get() or {}
-        return jsonify(users)
+        user_list = [{'name': name, 'age': data['age']} for name, data in users.items()]
+        return jsonify(user_list), 200
     except Exception as e:
         return jsonify({'error': f'Failed to retrieve data: {str(e)}'}), 500
+
+@app.route('/delete_data/<string:name>', methods=['DELETE'])
+def delete_data(name):
+    try:
+        ref = db.reference('users')
+        if ref.child(name).get() is not None:
+            ref.child(name).delete()
+            return jsonify({'message': f'User {name} deleted successfully'}), 200
+        else:
+            return jsonify({'error': f'User {name} does not exist'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Failed to delete data: {str(e)}'}), 500
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
