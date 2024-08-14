@@ -1,12 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import firebase_admin
 from firebase_admin import credentials, db
 import os
 import json
+from flask_cors import CORS  # Import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Necessary for flashing messages
+CORS(app)  # Enable CORS for all routes
 
 # Set up upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -26,43 +27,28 @@ firebase_admin.initialize_app(cred, {
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        # Check if the post request has the file part
         if 'file' in request.files:
             file = request.files['file']
             if file.filename != '':
-                # Save file to the uploads folder
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(file_path)
-                flash(f'File {file.filename} uploaded successfully.')
-            else:
-                flash('No file selected for uploading.')
-            return redirect(url_for('index'))
+                return jsonify({'message': 'File uploaded successfully'}), 200
+            return jsonify({'error': 'No file selected'}), 400
 
-        # Get the text and age from the form
         name = request.form.get('name')
         age = request.form.get('age')
-        
         if name and age:
-            # Write data to Firebase Realtime Database
             ref = db.reference('users')
             ref.child(name).set({'age': age})
+            return jsonify({'message': 'User data added successfully'}), 200
+        return jsonify({'error': 'Name and age are required'}), 400
 
-            return redirect(url_for('index'))
-        
-    # Get all users stored in Firebase
-    ref = db.reference('users')
-    users = ref.get()
-
-    # List of uploaded files
-    uploaded_files = os.listdir(app.config['UPLOAD_FOLDER'])
-
-    return render_template('index.html', users=users, uploaded_files=uploaded_files)
+    return jsonify({'error': 'Invalid request method'}), 405
 
 @app.route('/view_data', methods=['GET'])
 def view_data():
-    # Get all users stored in Firebase
     ref = db.reference('users')
-    users = ref.get()
+    users = ref.get() or {}
     return jsonify(users)
 
 @app.route('/uploads/<filename>')
