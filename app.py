@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, send_from_directory, flash
+from flask import Flask, request, jsonify, send_from_directory
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import credentials, db, storage
 import os
 import json
 from flask_cors import CORS
@@ -8,7 +8,6 @@ from flask_cors import CORS
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-app.secret_key = 'your_secret_key'  # Necessary for flashing messages
 
 # Set up upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -22,7 +21,8 @@ cred = credentials.Certificate(cred_dict)
 
 # Initialize Firebase
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://flask-bae57-default-rtdb.asia-southeast1.firebasedatabase.app/'
+    'databaseURL': 'https://flask-bae57-default-rtdb.asia-southeast1.firebasedatabase.app/',
+    'storageBucket': 'your-bucket-name.appspot.com'  # Update with your storage bucket
 })
 
 @app.route('/', methods=['GET', 'POST'])
@@ -34,23 +34,23 @@ def index():
                 try:
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                     file.save(file_path)
-                    flash(f'File {file.filename} uploaded successfully.')
-                    return jsonify({'message': 'File uploaded successfully'}), 200
+
+                    # Upload file to Firebase Storage
+                    bucket = storage.bucket()
+                    blob = bucket.blob(file.filename)
+                    blob.upload_from_filename(file_path)
+                    image_url = blob.generate_signed_url(expiration=3600)
+
+                    name = request.form.get('name')
+                    age = request.form.get('age')
+                    if name and age:
+                        ref = db.reference('users')
+                        ref.child(name).set({'age': age, 'imageUrl': image_url})
+                        return jsonify({'message': 'User data and file uploaded successfully'}), 200
+
                 except Exception as e:
                     return jsonify({'error': f'File upload failed: {str(e)}'}), 500
             return jsonify({'error': 'No file selected'}), 400
-
-        name = request.form.get('name')
-        age = request.form.get('age')
-        if name and age:
-            try:
-                ref = db.reference('users')
-                ref.child(name).set({'age': age})
-                flash(f'User {name} added successfully.')
-                return jsonify({'message': 'User data added successfully'}), 200
-            except Exception as e:
-                return jsonify({'error': f'Failed to add user data: {str(e)}'}), 500
-        return jsonify({'error': 'Name and age are required'}), 400
 
     return jsonify({'error': 'Invalid request method'}), 405
 
@@ -59,20 +59,18 @@ def view_data():
     try:
         ref = db.reference('users')
         users = ref.get() or {}
-        user_list = [{'name': name, 'age': data['age']} for name, data in users.items()]
-        return jsonify(user_list), 200
+        return jsonify(users)
     except Exception as e:
         return jsonify({'error': f'Failed to retrieve data: {str(e)}'}), 500
 
-@app.route('/delete_data/<string:name>', methods=['DELETE'])
+@app.route('/delete_data/<name>', methods=['DELETE'])
 def delete_data(name):
     try:
         ref = db.reference('users')
         if ref.child(name).get() is not None:
             ref.child(name).delete()
-            return jsonify({'message': f'User {name} deleted successfully'}), 200
-        else:
-            return jsonify({'error': f'User {name} does not exist'}), 404
+            return jsonify({'message': 'User data deleted successfully'}), 200
+        return jsonify({'error': 'User not found'}), 404
     except Exception as e:
         return jsonify({'error': f'Failed to delete data: {str(e)}'}), 500
 
