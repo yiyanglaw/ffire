@@ -1,12 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
+from flask import Flask, request, render_template_string, send_file, Response, redirect, url_for, flash, jsonify
 import firebase_admin
 from firebase_admin import credentials, db
 import os
 import json
+from werkzeug.utils import secure_filename
 
 # Initialize Flask app
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Necessary for flashing messages
+app.secret_key = 'your_secret_key'
 
 # Set up upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -25,53 +26,108 @@ firebase_admin.initialize_app(cred, {
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    message = ""
     if request.method == 'POST':
-        # Check if the post request has the file part
-        if 'file' in request.files:
-            file = request.files['file']
-            if file.filename != '':
-                # Save file to the uploads folder
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-                file.save(file_path)
-                flash(f'File {file.filename} uploaded successfully.')
-            else:
-                flash('No file selected for uploading.')
-            return redirect(url_for('index'))
+        if 'submit_name' in request.form:
+            name = request.form['name']
+            db.reference('names').push({'name': name})
+            message = 'Name saved successfully!'
+        elif 'submit_age' in request.form:
+            age = request.form['age']
+            db.reference('ages').push({'age': age})
+            message = 'Age saved successfully!'
+        elif 'submit_date' in request.form:
+            date = request.form['date']
+            db.reference('dates').push({'date': date})
+            message = 'Date saved successfully!'
+        elif 'view_name' in request.form:
+            return redirect(url_for('view_data', data_type='names'))
+        elif 'view_age' in request.form:
+            return redirect(url_for('view_data', data_type='ages'))
+        elif 'view_date' in request.form:
+            return redirect(url_for('view_data', data_type='dates'))
+        elif 'upload_image' in request.form:
+            name = request.form['name']
+            image = request.files['image']
+            if image:
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                image.save(image_path)
+                db.reference('images').push({
+                    'name': name,
+                    'filename': filename
+                })
+                message = 'Image uploaded successfully!'
+        elif 'download_image' in request.form:
+            name = request.form['name']
+            images_ref = db.reference('images').order_by_child('name').equal_to(name).get()
+            for key, val in images_ref.items():
+                filename = val['filename']
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                if os.path.exists(image_path):
+                    return send_file(image_path, as_attachment=True, download_name=f"{name}.jpg")
+            message = "Image not uploaded for this name!"
 
-        # Get the text and age from the form
-        name = request.form.get('name')
-        age = request.form.get('age')
-        
-        if name and age:
-            # Write data to Firebase Realtime Database
-            ref = db.reference('users')
-            ref.child(name).set({'age': age})
+    return render_template_string(main_template, message=message)
 
-            return redirect(url_for('index'))
-        
-    # Get all users stored in Firebase
-    ref = db.reference('users')
-    users = ref.get()
+@app.route('/view_data/<data_type>', methods=['GET'])
+def view_data(data_type):
+    ref = db.reference(data_type)
+    data = ref.get()
+    rows = [{'id': key, **value} for key, value in data.items()]
+    return render_template_string(view_template, rows=rows, table_name=data_type.capitalize())
 
-    # Provide a default empty dictionary if no users are found
-    if users is None:
-        users = {}
+# Template strings
+main_template = '''
+    <form method="post">
+        <h2>Submit Your Information</h2>
+        Name: <input type="text" name="name"><br>
+        Age: <input type="number" name="age"><br>
+        Date: <input type="date" name="date"><br>
+        <input type="submit" name="submit_name" value="Submit Name">
+        <input type="submit" name="submit_age" value="Submit Age">
+        <input type="submit" name="submit_date" value="Submit Date">
+    </form>
+    <br>
+    <form method="post">
+        <input type="submit" name="view_name" value="View All Names">
+        <input type="submit" name="view_age" value="View All Ages">
+        <input type="submit" name="view_date" value="View All Dates">
+    </form>
+    <br>
+    <form method="post" enctype="multipart/form-data">
+        <h2>Upload Your Image</h2>
+        Name: <input type="text" name="name"><br>
+        Image: <input type="file" name="image"><br>
+        <input type="submit" name="upload_image" value="Upload Image">
+    </form>
+    <br>
+    <form method="post">
+        <h2>Download Your Image</h2>
+        Name: <input type="text" name="name"><br>
+        <input type="submit" name="download_image" value="Download Image">
+    </form>
+    <br>
+    <h3>{{ message }}</h3>
+'''
 
-    # List of uploaded files
-    uploaded_files = os.listdir(app.config['UPLOAD_FOLDER'])
-
-    return render_template('index.html', users=users, uploaded_files=uploaded_files)
-
-@app.route('/view_data', methods=['GET'])
-def view_data():
-    # Get all users stored in Firebase
-    ref = db.reference('users')
-    users = ref.get()
-    return jsonify(users)
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+view_template = '''
+    <h2>{{ table_name }}</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Content</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row.id }}</td>
+            <td>{{ row.name or row.age or row.date }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/">Go Back</a>
+'''
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
