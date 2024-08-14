@@ -53,6 +53,10 @@ def index():
     ref = db.reference('users')
     users = ref.get()
 
+    # Provide a default empty dictionary if no users are found
+    if users is None:
+        users = {}
+
     # List of uploaded files
     uploaded_files = os.listdir(app.config['UPLOAD_FOLDER'])
 
