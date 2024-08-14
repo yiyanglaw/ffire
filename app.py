@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, flash
 import firebase_admin
 from firebase_admin import credentials, db
 import os
@@ -8,6 +8,7 @@ from flask_cors import CORS  # Import CORS
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+app.secret_key = 'your_secret_key'  # Necessary for flashing messages
 
 # Set up upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -30,30 +31,44 @@ def index():
         if 'file' in request.files:
             file = request.files['file']
             if file.filename != '':
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-                file.save(file_path)
-                return jsonify({'message': 'File uploaded successfully'}), 200
+                try:
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                    file.save(file_path)
+                    flash(f'File {file.filename} uploaded successfully.')
+                    return jsonify({'message': 'File uploaded successfully'}), 200
+                except Exception as e:
+                    return jsonify({'error': f'File upload failed: {str(e)}'}), 500
             return jsonify({'error': 'No file selected'}), 400
 
         name = request.form.get('name')
         age = request.form.get('age')
         if name and age:
-            ref = db.reference('users')
-            ref.child(name).set({'age': age})
-            return jsonify({'message': 'User data added successfully'}), 200
+            try:
+                ref = db.reference('users')
+                ref.child(name).set({'age': age})
+                flash(f'User {name} added successfully.')
+                return jsonify({'message': 'User data added successfully'}), 200
+            except Exception as e:
+                return jsonify({'error': f'Failed to add user data: {str(e)}'}), 500
         return jsonify({'error': 'Name and age are required'}), 400
 
     return jsonify({'error': 'Invalid request method'}), 405
 
 @app.route('/view_data', methods=['GET'])
 def view_data():
-    ref = db.reference('users')
-    users = ref.get() or {}
-    return jsonify(users)
+    try:
+        ref = db.reference('users')
+        users = ref.get() or {}
+        return jsonify(users)
+    except Exception as e:
+        return jsonify({'error': f'Failed to retrieve data: {str(e)}'}), 500
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    try:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    except Exception as e:
+        return jsonify({'error': f'File retrieval failed: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
