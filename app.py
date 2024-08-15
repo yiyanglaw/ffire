@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string, send_file, redirect, url_for
+from flask import Flask, request, render_template, send_file, redirect, url_for
 import firebase_admin
 from firebase_admin import credentials, db
 import os
@@ -68,66 +68,14 @@ def index():
                     return send_file(image_path, as_attachment=True, download_name=f"{name}.jpg")
             message = "Image not uploaded for this name!"
 
-    return render_template_string(main_template, message=message)
+    return render_template('index.html', message=message)
 
 @app.route('/view_data/<data_type>', methods=['GET'])
 def view_data(data_type):
     ref = db.reference(data_type)
     data = ref.get()
     rows = [{'id': key, **value} for key, value in data.items()]
-    return render_template_string(view_template, rows=rows, table_name=data_type.capitalize())
-
-# Template strings
-main_template = '''
-    <form method="post">
-        <h2>Submit Your Information</h2>
-        Name: <input type="text" name="name"><br>
-        Age: <input type="number" name="age"><br>
-        Date: <input type="date" name="date"><br>
-        <input type="submit" name="submit_name" value="Submit Name">
-        <input type="submit" name="submit_age" value="Submit Age">
-        <input type="submit" name="submit_date" value="Submit Date">
-    </form>
-    <br>
-    <form method="post">
-        <input type="submit" name="view_name" value="View All Names">
-        <input type="submit" name="view_age" value="View All Ages">
-        <input type="submit" name="view_date" value="View All Dates">
-    </form>
-    <br>
-    <form method="post" enctype="multipart/form-data">
-        <h2>Upload Your Image</h2>
-        Name: <input type="text" name="name"><br>
-        Image: <input type="file" name="image"><br>
-        <input type="submit" name="upload_image" value="Upload Image">
-    </form>
-    <br>
-    <form method="post">
-        <h2>Download Your Image</h2>
-        Name: <input type="text" name="name"><br>
-        <input type="submit" name="download_image" value="Download Image">
-    </form>
-    <br>
-    <h3>{{ message }}</h3>
-'''
-
-view_template = '''
-    <h2>{{ table_name }}</h2>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Content</th>
-        </tr>
-        {% for row in rows %}
-        <tr>
-            <td>{{ row.id }}</td>
-            <td>{{ row.name or row.age or row.date }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <br>
-    <a href="/">Go Back</a>
-'''
+    return render_template('view_data.html', rows=rows, table_name=data_type.capitalize())
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
