@@ -1,64 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask App</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-creative@6.0.7/css/styles.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">Flask App</h1>
-        <div class="alert alert-info" role="alert">
-            {{ message }}
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Flask App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <form method="post" class="mb-4">
-            <h2>Submit Your Information</h2>
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" class="form-control" id="name" name="name">
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-primary text-white text-center">
+        <div class="container">
+            <h1 class="text-uppercase mb-0">Flask Application</h1>
+            <h2 class="text-uppercase mb-0">Manage Your Data Efficiently</h2>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <section class="py-5">
+        <div class="container">
+            <div class="alert alert-info" role="alert">
+                {{ message }}
             </div>
-            <div class="form-group">
-                <label for="age">Age:</label>
-                <input type="number" class="form-control" id="age" name="age">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <h2 class="mb-3">Submit Your Information</h2>
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name:</label>
+                            <input type="text" class="form-control" id="name" name="name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="age" class="form-label">Age:</label>
+                            <input type="number" class="form-control" id="age" name="age">
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date:</label>
+                            <input type="date" class="form-control" id="date" name="date">
+                        </div>
+                        <button type="submit" name="submit_name" class="btn btn-light">Submit Name</button>
+                        <button type="submit" name="submit_age" class="btn btn-light">Submit Age</button>
+                        <button type="submit" name="submit_date" class="btn btn-light">Submit Date</button>
+                    </form>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h2 class="mb-3">Upload and Download Images</h2>
+                    <form method="post" enctype="multipart/form-data" class="mb-4">
+                        <div class="mb-3">
+                            <label for="upload_name" class="form-label">Name:</label>
+                            <input type="text" class="form-control" id="upload_name" name="name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Image:</label>
+                            <input type="file" class="form-control" id="image" name="image">
+                        </div>
+                        <button type="submit" name="upload_image" class="btn btn-light">Upload Image</button>
+                    </form>
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="download_name" class="form-label">Name:</label>
+                            <input type="text" class="form-control" id="download_name" name="name">
+                        </div>
+                        <button type="submit" name="download_image" class="btn btn-light">Download Image</button>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="date">Date:</label>
-                <input type="date" class="form-control" id="date" name="date">
-            </div>
-            <button type="submit" name="submit_name" class="btn btn-primary">Submit Name</button>
-            <button type="submit" name="submit_age" class="btn btn-primary">Submit Age</button>
-            <button type="submit" name="submit_date" class="btn btn-primary">Submit Date</button>
-        </form>
-        <form method="post" class="mb-4">
-            <button type="submit" name="view_name" class="btn btn-secondary">View All Names</button>
-            <button type="submit" name="view_age" class="btn btn-secondary">View All Ages</button>
-            <button type="submit" name="view_date" class="btn btn-secondary">View All Dates</button>
-        </form>
-        <form method="post" enctype="multipart/form-data" class="mb-4">
-            <h2>Upload Your Image</h2>
-            <div class="form-group">
-                <label for="upload_name">Name:</label>
-                <input type="text" class="form-control" id="upload_name" name="name">
-            </div>
-            <div class="form-group">
-                <label for="image">Image:</label>
-                <input type="file" class="form-control-file" id="image" name="image">
-            </div>
-            <button type="submit" name="upload_image" class="btn btn-success">Upload Image</button>
-        </form>
-        <form method="post" class="mb-4">
-            <h2>Download Your Image</h2>
-            <div class="form-group">
-                <label for="download_name">Name:</label>
-                <input type="text" class="form-control" id="download_name" name="name">
-            </div>
-            <button type="submit" name="download_image" class="btn btn-warning">Download Image</button>
-        </form>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+            <form method="post">
+                <h2 class="mb-3">View Data</h2>
+                <button type="submit" name="view_name" class="btn btn-secondary me-2">View All Names</button>
+                <button type="submit" name="view_age" class="btn btn-secondary me-2">View All Ages</button>
+                <button type="submit" name="view_date" class="btn btn-secondary">View All Dates</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white text-center py-3">
+        <div class="container">
+            <small>&copy; 2024 Flask Application. All rights reserved.</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 </body>
+
 </html>
