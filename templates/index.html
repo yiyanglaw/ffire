@@ -3,65 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Information System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <title>Flask App</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <section class="section">
-        <div class="container">
-            <h1 class="title">Clinic Information System</h1>
-
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <div class="notification is-success">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% endwith %}
-
-            <form method="post" enctype="multipart/form-data">
-                <div class="field">
-                    <label class="label">Name</label>
-                    <div class="control">
-                        <input class="input" type="text" name="name" placeholder="Enter patient name">
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label class="label">Age</label>
-                    <div class="control">
-                        <input class="input" type="number" name="age" placeholder="Enter patient age">
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label class="label">Patient Image</label>
-                    <div class="control">
-                        <input class="input" type="file" name="file">
-                    </div>
-                </div>
-
-                <div class="control">
-                    <button class="button is-link">Submit</button>
-                </div>
-            </form>
-
-            <h2 class="title is-4">Uploaded Users</h2>
-            <ul>
-                {% for name, details in users.items() %}
-                <li>{{ name }} - Age: {{ details.age }}</li>
-                {% endfor %}
-            </ul>
-
-            <h2 class="title is-4">Uploaded Files</h2>
-            <ul>
-                {% for file in uploaded_files %}
-                <li><a href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a></li>
-                {% endfor %}
-            </ul>
+    <div class="container mt-5">
+        <h1 class="text-center">Flask App</h1>
+        <div class="alert alert-info" role="alert">
+            {{ message }}
         </div>
-    </section>
+        <form method="post" class="mb-4">
+            <h2>Submit Your Information</h2>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" name="name">
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" class="form-control" id="age" name="age">
+            </div>
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" class="form-control" id="date" name="date">
+            </div>
+            <button type="submit" name="submit_name" class="btn btn-primary">Submit Name</button>
+            <button type="submit" name="submit_age" class="btn btn-primary">Submit Age</button>
+            <button type="submit" name="submit_date" class="btn btn-primary">Submit Date</button>
+        </form>
+        <form method="post" class="mb-4">
+            <button type="submit" name="view_name" class="btn btn-secondary">View All Names</button>
+            <button type="submit" name="view_age" class="btn btn-secondary">View All Ages</button>
+            <button type="submit" name="view_date" class="btn btn-secondary">View All Dates</button>
+        </form>
+        <form method="post" enctype="multipart/form-data" class="mb-4">
+            <h2>Upload Your Image</h2>
+            <div class="form-group">
+                <label for="upload_name">Name:</label>
+                <input type="text" class="form-control" id="upload_name" name="name">
+            </div>
+            <div class="form-group">
+                <label for="image">Image:</label>
+                <input type="file" class="form-control-file" id="image" name="image">
+            </div>
+            <button type="submit" name="upload_image" class="btn btn-success">Upload Image</button>
+        </form>
+        <form method="post" class="mb-4">
+            <h2>Download Your Image</h2>
+            <div class="form-group">
+                <label for="download_name">Name:</label>
+                <input type="text" class="form-control" id="download_name" name="name">
+            </div>
+            <button type="submit" name="download_image" class="btn btn-warning">Download Image</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
