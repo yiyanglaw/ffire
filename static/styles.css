@@ -1,0 +1,71 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+}
+
+header {
+    padding: 60px 0;
+    background: #007bff; /* Bootstrap primary color */
+    color: #fff;
+}
+
+footer {
+    background: #343a40; /* Bootstrap dark color */
+    color: #fff;
+}
+
+/* Navigation Bar */
+.navbar {
+    padding: 1rem;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    font-size: 1.1rem;
+    margin-left: 1rem;
+}
+
+/* Forms */
+form {
+    background: #f8f9fa; /* Light background for forms */
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form .form-label {
+    font-weight: bold;
+}
+
+.btn-light {
+    background: #ffffff;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+}
+
+.btn-light:hover {
+    background: #e2e6ea;
+}
+
+/* Tables */
+.table {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.table th, .table td {
+    text-align: center;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 0.25rem;
+    font-weight: bold;
+}
